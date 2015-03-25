@@ -1,0 +1,47 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.example.games.nearbyconnections.cpp"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="21" />
+
+    <uses-feature android:glEsVersion="0x00020000" />
+
+    <application
+        android:name="com.google.example.games.nearbyconnections.NearbyApplication"
+        android:allowBackup="true"
+        android:hasCode="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.nearby.connection.SERVICE_ID"
+            android:value="@string/service_id"/>
+        <!--
+             Our activity is the built-in NativeActivity framework class.
+             This will take care of integrating with our NDK code.
+        -->
+        <activity
+            android:name="com.google.example.games.nearbyconnections.NearbyNativeActivity"
+            android:label="@string/app_name"
+            android:configChanges="screenSize|orientation|keyboardHidden"
+            android:screenOrientation="landscape">
+
+            <!-- Tell NativeActivity the name of or .so -->
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="NearbyNativeActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
