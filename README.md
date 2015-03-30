@@ -7,25 +7,23 @@ Copyright (C) 2015 Google Inc.
 NearbyConnectionsNative: The sample demonstrates real time
 multiplayer game on [C++ Nearby Connection interface SDK](https://developers.google.com/games/services/cpp/nearby).
 
+* Create nearby_connection interface gpg::NearbyConnections::Builder
+* Connect to other peers via StartAdvertising(), StartDiscovery()
+* Send messages with SendReliableMessage() and SendUnreliableMessage()
+* Clean up Google Nearby Connection with Stop()
+* Other in-game communication like relaying connections/messages
+
 ##How to run a sample##
 
 For generic play game related instruction, please follow steps described in [Getting Started for C++](https://developers.google.com/games/services/cpp/GettingStartedNativeClient)
-
-For this specific demo, simple steps are:
-  File: NearbyConnection.cpp
-   Demonstrates features of Nearby Connections such as:
-       1) Create nearby_connection interface gpg::NearbyConnections::Builder
-       2) Connect to other peers via StartAdvertising(), StartDiscovery()
-       3) Send messages with SendReliableMessage() and SendUnreliableMessage()
-       4) Clean up Google Nearby Connection with Stop()
-       5) Other in-game communication like relaying connections/messages
-     Test Instructions:
-       1) Build and install on phone
-       2) Set ONE and ONLY ONE phone/device to be advertising first
-       3) All other devices to be discovering after advertising is ready (indicator is "stop" button is enabled)
-       4) Monitor bottom of the UI for connected Clients, once anyone connected, "start game" is enabled; play it at any time
-       5) while playing, your own score and other player's score should be visible to you at the bottom of the screen
-       note: play time is 30 second by default, set in GAME_DURATION in header file
+####Specific Steps for This App####
+1. Build App
+2. Install on phone
+3. Set ONE and ONLY ONE phone/device to be advertising
+4. All other devices to be discovering after advertising is ready (indicator is "stop" button is enabled)
+5. Monitor bottom of the UI for "Connected Clients"; once anyone connected, it should be bigger than 0, "Play Game" should be enabled; from here, you could play it at any time
+6. While playing, your own score and other player's scores should be visible to you at the bottom of the screen
+       note: play time is 30 second by default, and was hard coded as GAME_DURATION in header file
 
 ##Support##
 
