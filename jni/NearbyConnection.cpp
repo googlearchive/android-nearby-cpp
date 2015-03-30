@@ -482,7 +482,7 @@ void Engine::OnDiscoverButtonClick(void) {
  * OnStopButtonClick
  */
 void Engine::OnStopButtonClick(void) {
-  nearby_connection_->stop();
+  nearby_connection_->Stop();
   players_score_.clear();
   nbc_state_ = nearby_connection_state::IDLE;
   EnableUI(true);
