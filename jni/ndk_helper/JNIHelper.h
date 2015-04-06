@@ -237,7 +237,7 @@ class JNIHelper {
 
 extern "C" {
 JNIEXPORT void Java_com_sample_helper_NDKHelper_RunOnUiThreadHandler(
-    JNIEnv *env, int64_t pointer);
+    JNIEnv *env, jobject thiz, int64_t pointer);
 }
 
 }  // namespace ndk_helper
