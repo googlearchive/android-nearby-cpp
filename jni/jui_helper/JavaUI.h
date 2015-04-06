@@ -211,8 +211,7 @@ class JUIWindow {
 
   /*
    * Get mutex for JUI helpers
-   */  const static AttributeType attributes_[];
-
+   */
   std::mutex &GetMutex() { return mutex_; }
 
  private:
