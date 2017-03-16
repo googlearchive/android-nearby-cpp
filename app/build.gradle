@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+
+// Depend on another project that downloads and unzips the C++ SDK.
+evaluationDependsOn(':gpg-sdk')
+
+// As the plugin has created the build tasks, add the gpg-sdk task to
+// the task dependencies so it gets done before compiling
+tasks.whenTaskAdded { task ->
+    project(':gpg-sdk').defaultTasks.each {
+        t ->task.dependsOn project(':gpg-sdk').tasks[t]
+
+    }
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.google.example.games.nearbyconnections"
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters 'x86', 'armeabi-v7a'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/cpp/Android.mk'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.google.android.gms:play-services-games:10.0.0'
+    compile 'com.google.android.gms:play-services-nearby:10.0.0'
+}
