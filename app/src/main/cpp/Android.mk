@@ -1,11 +1,12 @@
 LOCAL_PATH := $(call my-dir)
+MY_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := NearbyNativeActivity
 LOCAL_SRC_FILES := NearbyNativeActivity.cpp NearbyConnection.cpp\
  NearbyNativeActivity_Engine.cpp GFKSimpleGame.cpp
- 
+
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/.. $(LOCAL_PATH)/ndk_helper/ $(LOCAL_PATH)/jui_helper/ $(LOCAL_PATH)/external/jsoncpp/include/
 LOCAL_CFLAGS :=
 LOCAL_CPPFLAGS := -std=c++11 -DREMOVE_TEAPOT=1
@@ -27,10 +28,17 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
-$(call import-add-path,$(LOCAL_PATH)/../../..)
-$(call import-add-path,$(LOCAL_PATH))
+
+include $(LOCAL_PATH)/../../../../gpg-sdk/gpg-cpp-sdk/android/Android.mk
+
+
+$(call import-add-path,$(MY_PATH))
 $(call import-module,ndk_helper)
 $(call import-module,jui_helper)
-$(call import-module,gpg-cpp-sdk/android)
+
+
 $(call import-module,android/native_app_glue)
 $(call import-module,android/cpufeatures)
+
+
+

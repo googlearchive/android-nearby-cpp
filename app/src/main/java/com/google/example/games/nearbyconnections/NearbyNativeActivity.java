@@ -26,7 +26,7 @@ import android.view.View;
 public class NearbyNativeActivity extends NativeActivity {
     // Load SO
     static {
-        System.load("libNearbyNativeActivity.so");
+        System.loadLibrary("NearbyNativeActivity");
     }
 
     @Override
@@ -58,10 +58,7 @@ public class NearbyNativeActivity extends NativeActivity {
 
         // Hide toolbar
         int SDK_INT = android.os.Build.VERSION.SDK_INT;
-        if (SDK_INT >= 11 && SDK_INT < 14) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.STATUS_BAR_HIDDEN);
-        } else if (SDK_INT >= 14 && SDK_INT < 19) {
+        if (SDK_INT >= 14 && SDK_INT < 19) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LOW_PROFILE);
@@ -129,10 +126,10 @@ public class NearbyNativeActivity extends NativeActivity {
 
     // Implemented in C++.
     public static native void nativeOnActivityResult(Activity activity,
-            int requestCode, int resultCode, Intent data);
+                                                     int requestCode, int resultCode, Intent data);
 
     public static native void nativeOnActivityCreated(Activity activity,
-            Bundle savedInstanceState);
+                                                      Bundle savedInstanceState);
 
     private static native void nativeOnActivityDestroyed(Activity activity);
 

@@ -1,5 +1,4 @@
 <resources>
-
-    <string name="app_name">NearbyConnections</string>
+    <string name="app_name">NearbyConnections Sample</string>
     <string name="service_id">google-nearby-connection-native-demo</string>
 </resources>

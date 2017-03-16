@@ -2,7 +2,7 @@ Google Nearby Connections C++ Samples
 ============================================================================
 Copyright (C) 2015 Google Inc.
 
-##Contents##
+# Contents
 
 NearbyConnectionsNative: The sample demonstrates real time
 multiplayer game on [C++ Nearby Connection interface SDK](https://developers.google.com/games/services/cpp/nearby).
@@ -13,10 +13,23 @@ multiplayer game on [C++ Nearby Connection interface SDK](https://developers.goo
 * Clean up Google Nearby Connection with Stop()
 * Other in-game communication like relaying connections/messages
 
-##How to run a sample##
+# How to run a sample
 
 For generic play game related instruction, please follow steps described in [Getting Started for C++](https://developers.google.com/games/services/cpp/GettingStartedNativeClient)
-####Specific Steps for This App####
+
+The build is gradle based.  To build from the command line run:
+```
+gradlew assembleDebug
+```
+
+In Android Studio, sometimes the first sync of the project cannot find the 
+Android.mk for gpg-sdk.  To fix this open the terminal window in Android Studio
+and run
+```
+gradlew gpg-sdk:download_and_stage_gpg_sdk
+```
+
+# Specific Steps for This App
 1. Build App
 2. Install on phone
 3. Set ONE and ONLY ONE phone/device to be advertising
@@ -25,7 +38,7 @@ For generic play game related instruction, please follow steps described in [Get
 6. While playing, your own score and other player's scores should be visible to you at the bottom of the screen
        note: play time is 30 second by default, and was hard coded as GAME_DURATION in header file
 
-##Support##
+# Support
 
 First of all, take a look at our [troubleshooting guide](https://developers.google.com/games/services/android/troubleshooting). Most setup issues can be solved by following this guide.
 
