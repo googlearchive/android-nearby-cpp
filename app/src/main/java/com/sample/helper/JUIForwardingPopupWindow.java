@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.sample.helper;
 
+import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -52,7 +53,7 @@ class JUIForwardingLayout extends LinearLayout {
 }
 
 public class JUIForwardingPopupWindow extends PopupWindow {
-    JUIForwardingPopupWindow(final NativeActivity activity, final View view) {
+    JUIForwardingPopupWindow(final Activity activity, final View view) {
         super(view.getWidth(), view.getHeight());
 
         JUIForwardingLayout dummyRelativeLayout = new JUIForwardingLayout(
@@ -70,7 +71,7 @@ public class JUIForwardingPopupWindow extends PopupWindow {
                     if( decor != null )
                     {
                         showAtLocation(decor, Gravity.TOP
-                                | Gravity.LEFT, view.getLeft(), view.getTop());
+                                | Gravity.START, view.getLeft(), view.getTop());
                     }
                 }
 

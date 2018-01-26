@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,26 @@
  */
 package com.sample.helper;
 
-import android.app.NativeActivity;
-import android.widget.TextView;
+import android.content.Context;
+import android.support.v7.widget.AppCompatTextView;
+import android.util.AttributeSet;
+
 
 /*
  * Java UI TextView implementation
  */
-public class JUITextView extends TextView {
-    public JUITextView(final NativeActivity activity) {
-        super(activity);
+public class JUITextView extends AppCompatTextView {
+
+    public JUITextView(Context context) {
+        super(context);
+    }
+
+    public JUITextView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public JUITextView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     public JUIForwardingPopupWindow getDummyWindow() {

@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ class Engine : public gpg::IEndpointDiscoveryListener {
   void OnPlayButtonClick(void);
 
   void BroadcastNewConnection(std::string const &endpoint);
-  void SendAllConnections(std::string const accepting_endpoint_id);
+  void SendAllConnections(const std::string& accepting_endpoint_id);
   void OnConnectionResponse(gpg::ConnectionResponse const &response);
   void ProcessEndPointNotconnected(std::string const &remote_endpoint_id);
   void AddConnectionEndpoint(std::string const &remote_endpoint_id,
@@ -153,7 +153,7 @@ class Engine : public gpg::IEndpointDiscoveryListener {
   bool BuildScorePayload(std::vector<uint8_t> &payload, int score,
                          std::string const & endpoint, bool final);
   bool DecodeScorePayload(std::vector<uint8_t> const &payload, int *p_score,
-                          std::string & endpoint);
+                          const std::string &endpoint);
 
   void DebugDumpConnections(void);
 
@@ -168,7 +168,6 @@ class Engine : public gpg::IEndpointDiscoveryListener {
   bool PlayOneRound(void);
 
   std::unique_ptr<gpg::NearbyConnections> nearby_connection_;
-  std::string my_endpoint_id_;
 
   // hashmap to keep tracking of player scores
   std::unordered_map<std::string, PLAYER_STATUS> players_score_;
@@ -209,4 +208,5 @@ class Engine : public gpg::IEndpointDiscoveryListener {
   std::string service_id_;
   uint32_t nbc_state_;
   gpg::MessageListenerHelper msg_listener_;
+  gpg::EndpointDiscoveryListenerHelper *discovery_helper_;
 };

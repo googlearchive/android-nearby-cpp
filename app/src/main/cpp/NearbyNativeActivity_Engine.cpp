@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,6 @@ void Engine::TermDisplay(const int32_t cmd) {
  * App, all event are handled on Java side
  */
 int32_t Engine::HandleInput(android_app *app, AInputEvent *event) {
-  Engine *eng = reinterpret_cast<Engine *> (app->userData);
   return 0;
 }
 
@@ -180,7 +179,6 @@ Engine g_engine;
  * event loop for receiving input events and doing other things.
  */
 void android_main(android_app *state) {
-  app_dummy();
 
   g_engine.SetState(state);
 

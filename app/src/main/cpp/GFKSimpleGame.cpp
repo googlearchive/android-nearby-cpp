@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,12 @@ const char OPS_CODE[] = {'+', '-',   // 1st and 2nd grader
                          '*', '/',   // 3rd and above
                          '^', 's'};  // 5th
 
-GFKSimple::GFKSimple() : level_(0), choice_count_(0) {
+GFKSimple::GFKSimple() : choice_count_(0), level_(0) {
   Init();
 }
 
 GFKSimple::GFKSimple(int32_t choiceCount, int32_t gradeLevel)
-    : level_(gradeLevel - 1), choice_count_(choiceCount) {
+    :  choice_count_(choiceCount), level_(gradeLevel - 1) {
   Init();
 }
 
@@ -137,7 +137,7 @@ void GFKSimple::Init(void) {
   }
   if (operation_count_ > (sizeof(OPS_CODE) / sizeof(OPS_CODE[0]))) {
     LOGW("Operation (%d) is bigger than simple game capability(%d)",
-         operation_count_, sizeof(OPS_CODE)/sizeof(OPS_CODE[0]));
+         operation_count_, static_cast<int>(sizeof(OPS_CODE)/sizeof(OPS_CODE[0])));
     operation_count_ = (sizeof(OPS_CODE) / sizeof(OPS_CODE[0]));
   }
 }

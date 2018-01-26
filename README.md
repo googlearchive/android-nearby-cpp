@@ -1,6 +1,6 @@
 Google Nearby Connections C++ Samples
 ============================================================================
-Copyright (C) 2015 Google Inc.
+Copyright (C) 2015 Google LLC
 
 # Contents
 

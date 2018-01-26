@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ */
+/**
  * File: NearbyConnection.cpp
  *  Demonstrates features of Nearby Connections such as:
  *      1) Create nearby_connection interface gpg::NearbyConnections::Builder
@@ -65,7 +66,6 @@ void Engine::InitGoogleNearbyConnection() {
           case gpg::InitializationStatus::VALID:
             // Our interface is ready to use [ could advertise or discover ]
             LOGI("InitializationFinished() returned VALID");
-            my_endpoint_id_ = nearby_connection_->GetLocalEndpointId();
             nbc_state_ = nearby_connection_state::IDLE;
              // Configure our listener to use for listening
             msg_listener_.SetOnMessageReceivedCallback(
@@ -131,49 +131,47 @@ void Engine::OnMessageReceivedCallback(int64_t receiver_id,
                                        bool is_reliable) {
   std::string msg;
   for (auto ch : payload) msg += ch;
-  std::string new_endpoint_id(msg.substr(1));
 
   switch (msg[0]) {
     case PAYLOAD_HEADER_NEW_CONNECTION: {
-      LOGV("Adding relayed endpoint (%s, %d) to me(%s)",
-           new_endpoint_id.c_str(), new_endpoint_id.length(),
-           my_endpoint_id_.c_str());
-      AddConnectionEndpoint(new_endpoint_id, false, false);
+      LOGV("Adding relayed endpoint (%s, %d) to me",
+           remote_endpoint.c_str(), static_cast<int>(remote_endpoint.length()));
+      std::string other_endpoint = msg.substr(1);
+      AddConnectionEndpoint(other_endpoint, false, false);
       EnableUI(true);
       return;
     }
     case PAYLOAD_HEADER_GUEST_READY: {
       // The link I am hosting is up, and the other end ( guest end )
       // is ready to accept all of my connected nodes
-      LOGI("Get %s ready message, size=%d", new_endpoint_id.c_str(),
-           new_endpoint_id.size());
-      SendAllConnections(new_endpoint_id);
+      LOGI("Received ready message from =%s", remote_endpoint.c_str());
+      SendAllConnections(remote_endpoint);
       return;
     }
     case PAYLOAD_HEADER_INTERMEDIATE_SCORE: {
       int score;
-      if (!DecodeScorePayload(payload, &score, new_endpoint_id)) {
+      if (!DecodeScorePayload(payload, &score, remote_endpoint)) {
         LOGE("DecodeScorePayload return failed\n");
       } else {
-        UpdatePlayerScore(new_endpoint_id, score, false);
+        UpdatePlayerScore(remote_endpoint, score, false);
         UpdateScoreBoardUI(true);
       }
       return;
     }
     case PAYLOAD_HEADER_FINAL_SCORE: {
       int score;
-      if (!DecodeScorePayload(payload, &score,new_endpoint_id)) {
+      if (!DecodeScorePayload(payload, &score,remote_endpoint)) {
         LOGE("DecodeScorePayload return failed\n");
       } else {
-        UpdatePlayerScore(new_endpoint_id, score, true);
+        UpdatePlayerScore(remote_endpoint, score, true);
         UpdateScoreBoardUI(true);
       }
       return;
     }
     case PAYLOAD_HEADER_DISCONNECTED: {
       LOGV("Received Disconnect Notification for Endpoint ID %s",
-           new_endpoint_id.c_str());
-      RemoveConnectionEndpoint(new_endpoint_id, false);
+           remote_endpoint.c_str());
+      RemoveConnectionEndpoint(remote_endpoint, false);
       EnableUI(true);
       return;
     }
@@ -208,14 +206,11 @@ void Engine::OnMessageDisconnectedCallback(int64_t receiver_id,
  */
 void Engine::OnEndpointFound(int64_t client_id,
                              gpg::EndpointDetails const &endpoint_details) {
-  LOGV("EndpointFound(%lld)", client_id);
-  LOGV("endpoint details: endpoint_id=%s, device_id=%s, name=%s, service_id=%s",
-       endpoint_details.endpoint_id.c_str(), endpoint_details.device_id.c_str(),
+  LOGV("EndpointFound(%lld)", static_cast<long long>(client_id));
+  LOGV("endpoint details: endpoint_id=%s, name=%s, service_id=%s",
+       endpoint_details.endpoint_id.c_str(),
        endpoint_details.name.c_str(), endpoint_details.service_id.c_str());
 
-  LOGV("local Endpoint Details: endpointId=%s, deviceId=%s, service_id=%s",
-       (nearby_connection_->GetLocalEndpointId()).c_str(),
-       (nearby_connection_->GetLocalDeviceId()).c_str(), service_id_.c_str());
 
   std::vector<uint8_t> payload;
   std::string name;
@@ -276,10 +271,8 @@ void Engine::OnConnectionResponse(gpg::ConnectionResponse const &response) {
     // Notification to the other end that I am ready to accept
     // all other connections that connected to the sender
     std::vector<uint8_t> payload;
-    payload.resize(my_endpoint_id_.length() + 1);
+    payload.resize(1);
     payload[0] = PAYLOAD_HEADER_GUEST_READY;
-    memcpy(reinterpret_cast<char *>(&payload[1]), my_endpoint_id_.c_str(),
-           my_endpoint_id_.length());
     nearby_connection_->SendReliableMessage(response.remote_endpoint_id,
                                             payload);
 
@@ -308,7 +301,7 @@ void Engine::OnConnectionResponse(gpg::ConnectionResponse const &response) {
  */
 void Engine::BroadcastNewConnection(std::string const &endpoint_id) {
   std::vector<uint8_t> payload;
-  payload.resize(endpoint_id.length() + 1);  // I do not sending the '\0'
+  payload.resize(endpoint_id.length() + 1);  // I do not send the '\0'
   payload[0] = PAYLOAD_HEADER_NEW_CONNECTION;
   strncpy(reinterpret_cast<char *>(&payload[1]), endpoint_id.c_str(),
           endpoint_id.length());
@@ -337,7 +330,7 @@ void Engine::BroadcastNewConnection(std::string const &endpoint_id) {
  *    because it just established a connection to this device and has no
  *    knowledge of other endpoints [directly connecting to me ]
  */
-void Engine::SendAllConnections(std::string const accepting_endpoint_id) {
+void Engine::SendAllConnections(const std::string& accepting_endpoint_id) {
   std::vector<uint8_t> payload;
   for (auto it = players_score_.begin(); it != players_score_.end(); ++it) {
     if (it->second.endpoint_id_ == accepting_endpoint_id ||
@@ -360,13 +353,14 @@ void Engine::SendAllConnections(std::string const accepting_endpoint_id) {
 void Engine::BroadcastScore(int32_t score, bool final) {
 
   std::vector<uint8_t> payload;
-  if(BuildScorePayload(payload, score_counter_, my_endpoint_id_, final) == false) {
+    std::string my_placeholder_id = "Broadcast_me";
+  if(BuildScorePayload(payload, score_counter_, my_placeholder_id, final) == false) {
     LOGE("BuildScorePayload() failed for BroadcastScore");
     return;
   }
   for (auto it = players_score_.begin(); it != players_score_.end(); ++it) {
     if (it->second.connected_ && it->second.is_direct_connection_) {
-      LOGI("Broadcasting my(%s) score to: %s, %s", my_endpoint_id_.c_str(),
+      LOGI("Broadcasting my(%s) score to: %s, %s", my_placeholder_id.c_str(),
            it->second.endpoint_id_.c_str(),
            std::string(reinterpret_cast<char*>(&payload[0]), payload.size())
            .c_str());
@@ -418,7 +412,7 @@ void Engine::OnAdvertiseButtonClick(void) {
         app_identifiers,            // Package name is identifier
         gpg::Duration::zero(),      // Advertise forever
         [this](int64_t client_id, gpg::StartAdvertisingResult const &result) {
-          LOGV("StartAdvertisingResult(%lld, %s)", client_id,
+          LOGV("StartAdvertisingResult(%lld, %s)", static_cast<long long>(client_id),
                result.local_endpoint_name.c_str());
           switch (result.status) {
             case gpg::StartAdvertisingResult::StatusCode::SUCCESS:
@@ -443,24 +437,27 @@ void Engine::OnAdvertiseButtonClick(void) {
           EnableUI(true);
         },
         [this](int64_t client_id, gpg::ConnectionRequest const &request) {
-          LOGI("ConnectionRequest(%lld)", client_id);
+          LOGI("ConnectionRequest(%lld)", static_cast<long long>(client_id));
           LOGI(
-              "remote info: req.endpoint_id=%s, req.device_id=%s, req_name = "
+              "remote info: req.endpoint_id=%s,  req_name = "
               "%s",
               request.remote_endpoint_id.c_str(),
-              request.remote_device_id.c_str(),
               request.remote_endpoint_name.c_str());
           std::vector<uint8_t> payload;   //empty packet for remote
+
+          // Accept all the connection requests as they come in.
           nearby_connection_->AcceptConnectionRequest(
               request.remote_endpoint_id, payload, msg_listener_);
           BroadcastNewConnection(request.remote_endpoint_id);
           // Adding this end point into the connected state:
-          AddConnectionEndpoint(request.remote_endpoint_id, true, true);
+
+          AddConnectionEndpoint(request.remote_endpoint_id, true,
+                  /* is the host (advertiser of this connection) */true);
           nbc_state_ |= nearby_connection_state::CONNECTED;
           nbc_state_ &= ~nearby_connection_state::IDLE;
           EnableUI(true);
           LOGI("Accepting Request sending out (for %s)",
-               request.remote_device_id.c_str());
+               request.remote_endpoint_id.c_str());
   });
   EnableUI(true);
 }
@@ -475,7 +472,19 @@ void Engine::OnDiscoverButtonClick(void) {
   nbc_state_ |= nearby_connection_state::DISCOVERING;
   nbc_state_ &= ~nearby_connection_state::IDLE;
   EnableUI(true);
-  nearby_connection_->StartDiscovery(service_id_, gpg::Duration::zero(),this);
+
+  if (this->discovery_helper_) {
+    delete this->discovery_helper_;
+  }
+  this->discovery_helper_ = new gpg::EndpointDiscoveryListenerHelper();
+  discovery_helper_->SetOnEndpointFoundCallback([this](int64_t client_id,
+                                                       const gpg::EndpointDetails &endpoint_details)
+                                                {
+                                                    this->OnEndpointFound(client_id, endpoint_details);
+                                                });
+
+
+  nearby_connection_->StartDiscovery(service_id_, gpg::Duration::zero(),*this->discovery_helper_);
 }
 
 /*
@@ -581,7 +590,7 @@ void Engine::UpdatePlayerScore(std::string const & endpoint_id,
                                int score, bool final) {
   auto player = players_score_.find(endpoint_id);
   if (player == players_score_.end()) {
-    LOGE("Error: player(%s) is not in my cache", player->first.c_str());
+    LOGE("Error: player(%s) is not in my cache", endpoint_id.c_str());
     DebugDumpConnections();
     return;
   }
@@ -649,14 +658,13 @@ bool  Engine::BuildScorePayload(std::vector<uint8_t> &payload, int score,
  * DecodeScorePayload()
  */
 bool Engine::DecodeScorePayload(std::vector<uint8_t> const &payload, int *p_score,
-                        std::string & endpoint) {
+                        const std::string &endpoint) {
     if(!p_score) {
         LOGE("null pointer for decideScorePayload %p", p_score);
         return false;
     }
     std::string payload_str(reinterpret_cast<const char*>(&payload[0]),payload.size());
     int endpoint_size = (payload_str[1] - '0') * 10 + (payload_str[2] - '0');
-    endpoint = payload_str.substr(3, endpoint_size);
 
     //get our score
     payload_str = payload_str.substr(3+endpoint_size);
@@ -680,14 +688,14 @@ void Engine::DebugDumpConnections(void) {
     LOGI(
         "Player Info: endpoint_id(%s,%d), score(%d), connected(%s), "
         "native(%s), host(%s), Finished(%s)",
-        const_it->first.c_str(), const_it->first.size(),
+        const_it->first.c_str(), static_cast<int>(const_it->first.size()),
         const_it->second.score_, const_it->second.connected_ ? "true" : "false",
         const_it->second.is_direct_connection_ ? "true" : "false",
         const_it->second.is_host_ ? "true" : "false",
         const_it->second.finished_ ? "true" : "false");
     if (const_it->second.is_direct_connection_) {
       LOGI("Host Endpoint ID = %s",
-           const_it->second.is_host_ ? my_endpoint_id_.c_str()
+           const_it->second.is_host_ ? "Debug_placeholder_id"
                                      : const_it->second.endpoint_id_.c_str());
     }
   }

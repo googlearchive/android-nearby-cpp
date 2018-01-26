@@ -1,5 +1,5 @@
-/**
- * Copyright 2015 Google Inc. All Rights Reserved.
+/*
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.example.games.nearbyconnections;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NativeActivity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.widget.Toast;
 
 public class NearbyNativeActivity extends NativeActivity {
+    private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 5444;
+
     // Load SO
     static {
         System.loadLibrary("NearbyNativeActivity");
     }
+
+    /**
+     * These permissions are required before connecting to Nearby Connections. Only {@link
+     * Manifest.permission#ACCESS_COARSE_LOCATION} is considered dangerous, so the others should be
+     * granted just by having them in our AndroidManfiest.xml
+     */
+    private static final String[] REQUIRED_PERMISSIONS =
+            new String[] {
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.CHANGE_WIFI_STATE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +125,10 @@ public class NearbyNativeActivity extends NativeActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        nativeOnActivityStarted(this);
+        if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
+            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
+        }
+            nativeOnActivityStarted(this);
     }
 
     @Override
@@ -124,6 +148,20 @@ public class NearbyNativeActivity extends NativeActivity {
         nativeOnActivityResult(this, requestCode,resultCode, data);
     }
 
+    public void onRequestPermissionsResult(
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_REQUIRED_PERMISSIONS) {
+            for (int grantResult : grantResults) {
+                if (grantResult == PackageManager.PERMISSION_DENIED) {
+                    Toast.makeText(this, R.string.error_missing_permissions, Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
+                }
+            }
+            recreate();
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
     // Implemented in C++.
     public static native void nativeOnActivityResult(Activity activity,
                                                      int requestCode, int resultCode, Intent data);
@@ -145,4 +183,15 @@ public class NearbyNativeActivity extends NativeActivity {
     private static native void nativeOnActivityStopped(Activity activity);
 
     native public void OnPauseHandler();
+
+    /** @return True if the app was granted all the permissions. False otherwise. */
+    public static boolean hasPermissions(Context context, String... permissions) {
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(context, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
